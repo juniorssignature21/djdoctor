@@ -17,6 +17,9 @@ from django_doctor.explain.traceback import ParsedError, from_probe_error, parse
 
 log = logging.getLogger(__name__)
 
+#: Tests set this to surface crashing rules instead of silently skipping them.
+RAISE_RULE_ERRORS = False
+
 
 def explain_parsed(parsed: ParsedError, project: ProjectContext | None = None) -> Diagnosis:
     ctx = RuleContext(parsed=parsed, project=project)
@@ -24,6 +27,8 @@ def explain_parsed(parsed: ParsedError, project: ProjectContext | None = None) -
         try:
             diagnosis = func(ctx)
         except Exception:  # a buggy rule must never hide the user's error
+            if RAISE_RULE_ERRORS:
+                raise
             log.debug("rule %s crashed", rule_id, exc_info=True)
             continue
         if diagnosis is not None:

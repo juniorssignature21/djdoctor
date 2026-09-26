@@ -42,8 +42,19 @@ def rule(rule_id: str) -> Callable[[RuleFunc], RuleFunc]:
     return decorator
 
 
+#: Evaluation order of rule modules (specific before general). Within a
+#: module, rules run in definition order. The "generic" fallback always runs last.
+MODULE_ORDER = ["migrations", "config", "database", "web", "models"]
+
+
 def registered_rules() -> list[tuple[str, RuleFunc]]:
-    return list(_RULES)
+    def key(item: tuple[int, tuple[str, RuleFunc]]):
+        index, (rule_id, func) = item
+        module = func.__module__.rsplit(".", 1)[-1]
+        position = MODULE_ORDER.index(module) if module in MODULE_ORDER else len(MODULE_ORDER)
+        return (rule_id == "generic", position, index)
+
+    return [entry for _, entry in sorted(enumerate(_RULES), key=key)]
 
 
 @dataclass

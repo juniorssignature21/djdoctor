@@ -57,8 +57,11 @@ def no_reverse_match(ctx: RuleContext) -> Diagnosis | None:
             else:
                 d.add_evidence(f"No URL pattern is named '{name}'.", verified=True)
                 suffix = [n for n in names if n.split(":")[-1] == name.split(":")[-1]]
-                if suffix:
+                if len(suffix) == 1:
                     d.add_cause(f"The URL is namespaced. Use '{suffix[0]}' instead of '{name}'.", Confidence.DETECTED)
+                elif suffix:
+                    d.add_cause(f"The URL is namespaced. Use one of {quote_list(suffix)} instead of '{name}'.",
+                                Confidence.DETECTED)
                 for m in close_matches(name, names):
                     if m not in suffix:
                         d.add_cause(f"Typo: did you mean '{m}'?", Confidence.POSSIBLE)
@@ -241,7 +244,7 @@ def csrf_failure(ctx: RuleContext) -> Diagnosis | None:
                     exit_code=ExitCode.CONFIGURATION_ERROR, risk=Risk.NONE,
                     why="Django's CSRF protection rejected a state-changing request (HTTP 403).")
         origin = match.groupdict().get("origin")
-        d.fixes.append(fix.format(origin=origin or ""))
+        d.fixes.append(fix.replace("{origin}", origin or ""))
         if ctx.project and (info := ctx.project.info):
             trusted = (info.get("other") or {}).get("CSRF_TRUSTED_ORIGINS")
             d.add_evidence(f"CSRF_TRUSTED_ORIGINS = {trusted!r}", verified=True)

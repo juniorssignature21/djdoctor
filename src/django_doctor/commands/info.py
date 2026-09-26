@@ -26,9 +26,10 @@ def register(app: typer.Typer) -> None:
         result = state.runner().run("info")
         if not result.ok:
             fail_with_probe_error(state, result, headline="The project's settings could not be loaded.")
+        # The probe never returns the key itself, only whether it is set.
+        secret_set = bool((result.data.get("secret_key") or {}).get("set"))
         data = redact_mapping(result.data)
-        # The probe never returns the key itself; make that explicit.
-        data["secret_key"] = {"set": data["secret_key"]["set"], "value": MASK if data["secret_key"]["set"] else None}
+        data["secret_key"] = {"set": secret_set, "value": MASK if secret_set else None}
         if json_output:
             print_json(c, {"project": {"root": str(project.root), "manage_py": str(project.manage_py),
                                        "settings": project.settings_module, "python": project.python}, **data})

@@ -723,7 +723,10 @@ def _pending_without_db(disk_loader, result, args):
 
 
 def _check_schema(connection, apps, result):
+    # Apps with unapplied migrations or not-yet-migrated model changes are
+    # expected to differ from the database; that is not a schema mismatch.
     pending_apps = set(p["app"] for p in result["pending"] if not p["backwards"])
+    pending_apps.update(result["changes"].keys())
     with connection.cursor() as cursor:
         tables = set(t.lower() for t in connection.introspection.table_names(cursor))
         for model in apps.get_models(include_auto_created=True):

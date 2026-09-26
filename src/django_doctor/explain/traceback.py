@@ -222,7 +222,7 @@ def parse_error(text: str) -> ParsedError | None:
     # Well-known Django warnings printed without an exception type.
     for line in reversed(lines):
         if re.search(r"You have \d+ unapplied migration\(s\)|have changes that are not yet reflected in a migration|"
-                     r"System check identified some issues", line):
+                     r"System check identified some issues|It is impossible to (?:add|change) ", line):
             idx = lines.index(line)
             message = "\n".join(lines[idx:idx + 30]).strip()
             return ParsedError([ExceptionInfo("DjangoWarning", message)], text, had_traceback=False)
