@@ -1,0 +1,20 @@
+name: Feature request / new error explanation
+description: Suggest a feature, a doctor check, or an error Django Doctor should explain.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, or which error should be explained better?
+    validations:
+      required: true
+  - type: textarea
+    id: example
+    attributes:
+      label: Example error output (secrets removed)
+      render: shell
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behaviour

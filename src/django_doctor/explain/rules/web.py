@@ -210,7 +210,8 @@ def disallowed_host(ctx: RuleContext) -> Diagnosis | None:
                 exc=exc, exit_code=ExitCode.CONFIGURATION_ERROR, risk=Risk.NONE,
                 why="ALLOWED_HOSTS protects against HTTP Host header attacks; Django rejects hosts not listed.")
     if ctx.project and (info := ctx.project.info):
-        d.add_evidence(f"ALLOWED_HOSTS = {info.get('allowed_hosts')!r} (DEBUG={info.get('debug')})", verified=True)
+        d.add_evidence(f"ALLOWED_HOSTS = {info.get('allowed_hosts')!r} (DEBUG={info.get('debug')})", verified=True,
+                       private=True)
     d.add_cause(f"'{host}' needs to be added to ALLOWED_HOSTS.", Confidence.LIKELY)
     d.fixes.append(f"Add '{host}' to ALLOWED_HOSTS (avoid '*' in production).")
     return d
@@ -247,7 +248,7 @@ def csrf_failure(ctx: RuleContext) -> Diagnosis | None:
         d.fixes.append(fix.replace("{origin}", origin or ""))
         if ctx.project and (info := ctx.project.info):
             trusted = (info.get("other") or {}).get("CSRF_TRUSTED_ORIGINS")
-            d.add_evidence(f"CSRF_TRUSTED_ORIGINS = {trusted!r}", verified=True)
+            d.add_evidence(f"CSRF_TRUSTED_ORIGINS = {trusted!r}", verified=True, private=True)
             if origin and trusted is not None and origin not in trusted:
                 d.add_cause(f"'{origin}' is not listed in CSRF_TRUSTED_ORIGINS.", Confidence.DETECTED)
         d.add_cause("The frontend and backend run on different origins (ports/domains) or behind a proxy.", Confidence.POSSIBLE)

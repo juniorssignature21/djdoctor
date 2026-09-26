@@ -6,8 +6,9 @@ import sys
 from pathlib import Path
 
 import typer
+from rich.markup import escape
 
-from django_doctor.ai.base import AIUnavailable
+from django_doctor.ai.base import AIUnavailable, build_user_prompt
 from django_doctor.ai.registry import explain_with_ai
 from django_doctor.branding import CLI_NAME
 from django_doctor.bridge.manage import TracebackRecorder
@@ -32,8 +33,13 @@ def _project_context(state: AppState, inspect: bool) -> ProjectContext | None:
     return ProjectContext(project, state.runner())
 
 
-def _emit(state: AppState, diagnosis: Diagnosis, *, json_output: bool, raw: bool, ai: bool, ai_provider: str | None) -> None:
+def _emit(state: AppState, diagnosis: Diagnosis, *, json_output: bool, raw: bool, ai: bool, ai_provider: str | None,
+          ai_preview: bool = False) -> None:
     c = state.console
+    if ai_preview:
+        c.print("[heading]Payload --ai would send[/heading] [muted](nothing was sent)[/muted]")
+        c.raw(build_user_prompt(diagnosis.to_dict()))
+        return
     if json_output:
         print_json(c, diagnosis.to_dict())
         return
@@ -50,7 +56,7 @@ def _emit(state: AppState, diagnosis: Diagnosis, *, json_output: bool, raw: bool
         except AIUnavailable as exc:
             c.warning(f"AI explanation unavailable: {exc}")
             return
-        c.print(f"[heading]AI explanation[/heading] [muted](via {provider}; unverified — commands are NOT executed)[/muted]")
+        c.print(f"[heading]AI explanation[/heading] [muted](via {escape(provider)}; unverified — commands are NOT executed)[/muted]")
         c.raw(text)
 
 
@@ -67,12 +73,13 @@ def register(app: typer.Typer) -> None:
         raw: bool = typer.Option(False, "--raw", help="Also print the original (redacted) error message."),
         ai: bool = typer.Option(False, "--ai", help="Add an optional AI explanation (sends the redacted report, never source code)."),
         ai_provider: str = typer.Option(None, "--ai-provider", help="AI provider name (overrides configuration)."),
+        ai_preview: bool = typer.Option(False, "--ai-preview", help="Print exactly what --ai would send, without sending it."),
     ) -> None:
         """Explain the latest Django error: what happened, why, evidence and what to do."""
         state = get_state(ctx)
         c = state.console
         pctx = _project_context(state, not no_inspect)
-        emit_kwargs = dict(json_output=json_output, raw=raw, ai=ai, ai_provider=ai_provider)
+        emit_kwargs = dict(json_output=json_output, raw=raw, ai=ai, ai_provider=ai_provider, ai_preview=ai_preview)
 
         use_stdin = text is None and (source == "-" or (source is None and not _stdin_is_tty()))
         if use_stdin and source is None and _saved_error(state) is not None and not _stdin_ready(timeout=1.5):

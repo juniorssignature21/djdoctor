@@ -297,7 +297,7 @@ def _add_db_config_evidence(ctx: RuleContext, d: Diagnosis) -> None:
     if db.get("user"):
         parts.append(f"user={db['user']}")
     parts.append("password=" + ("********" if db.get("has_password") else "(not set)"))
-    d.add_evidence("DATABASES['default']: " + ", ".join(parts), verified=True)
+    d.add_evidence("DATABASES['default']: " + ", ".join(parts), verified=True, private=True)
 
 
 # --------------------------------------------------------------- integrity

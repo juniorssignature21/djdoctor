@@ -17,6 +17,8 @@ import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from django_doctor.security import strip_control
+
 TRACEBACK_START = "Traceback (most recent call last):"
 CHAIN_MARKERS = (
     "The above exception was the direct cause of the following exception:",
@@ -153,7 +155,7 @@ class ParsedError:
 
 # ------------------------------------------------------------------ cleaning
 def clean_output(text: str) -> list[str]:
-    text = _ANSI.sub("", text.replace("\r\n", "\n"))
+    text = strip_control(_ANSI.sub("", text.replace("\r\n", "\n")))
     lines = text.split("\n")
     lines = _strip_common_prefix(lines)
     out = []
@@ -294,4 +296,4 @@ def from_probe_error(error: dict) -> ParsedError:
     if parsed is not None:
         return parsed
     qualified = f"{error.get('module')}.{error.get('type')}" if error.get("module") not in (None, "builtins") else error.get("type", "Error")
-    return ParsedError([ExceptionInfo(qualified, error.get("message", ""))], tb, had_traceback=bool(tb))
+    return ParsedError([ExceptionInfo(qualified, strip_control(error.get("message", "")))], tb, had_traceback=bool(tb))

@@ -79,15 +79,18 @@ explanations — and never silently does anything destructive.
 ## Installation
 
 ```bash
-pip install django-doctor
+pip install djdoctor
 ```
+
+> The PyPI package is **`djdoctor`**. `django-doctor` on PyPI is an unrelated project —
+> do not install it expecting this tool.
 
 Install it into the **same virtualenv as your project** (recommended), or point it at the
 project's interpreter with `--python` / `DJDOCTOR_PYTHON`. Django itself is not a hard
 dependency of the tool: Django Doctor always uses the Django installed for your project.
 
-Optional extras for AI explanations: `pip install "django-doctor[anthropic]"` or
-`"django-doctor[openai]"`.
+Optional extras for AI explanations: `pip install "djdoctor[anthropic]"` or
+`"djdoctor[openai]"`.
 
 To try it from a checkout:
 
@@ -366,8 +369,10 @@ Django Error → deterministic parsing & rules → verified Diagnosis → (optio
 
 Guarantees:
 
-- Only the **redacted structured report** is sent — never source files, settings values or
-  environment variables. The line of your code in the location is stripped.
+- Only an **allow-listed, redacted part of the diagnosis** is sent: error type and message
+  (secrets masked), findings, causes, fixes and file:line locations. Never source code,
+  setting values, environment variable values, database hosts or request paths.
+- Preview the exact payload with `djdoctor explain --ai-preview` — nothing is sent.
 - Opt-in on every invocation (`--ai`); nothing is ever sent automatically.
 - Output is displayed as text marked *unverified*. **Nothing an AI returns is executed.**
 - Provider-agnostic: `anthropic` (default model `claude-opus-5`), `openai` (model must be
@@ -392,6 +397,10 @@ Guarantees:
 
 ## Security
 
+See [SECURITY.md](SECURITY.md) for the threat model and how to report a vulnerability privately.
+Note that, like `manage.py`, Django Doctor executes your project's code — only run it on
+projects you trust.
+
 - Secrets are never printed: the inspection process never returns `SECRET_KEY`, database
   passwords or environment variable values; displayed text passes through a redactor
   (`password=…`, `scheme://user:pass@`, bearer tokens, PostgreSQL `DETAIL` key values).
@@ -399,6 +408,9 @@ Guarantees:
   migration files written during analysis. The only reads beyond metadata are `COUNT(*)`
   queries for data-at-risk evidence.
 - Destructive operations always need explicit confirmation (see above).
+- `.djdoctor/` (error logs and SQLite backups, which contain your data) is owner-only
+  (`0700`/`0600`) and git-ignored; saved error logs are redacted.
+- Log files given to `explain` are treated as data: terminal escape sequences are stripped.
 - No source code is ever sent anywhere; the AI layer is opt-in and cannot execute anything.
 
 ## Compatibility
@@ -468,7 +480,8 @@ tox                     # Django 4.2 / 5.2 / 6.x matrix
 
 ## Contributing
 
-Contributions are welcome — especially new explanation rules.
+Contributions are welcome — especially new explanation rules. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) and the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 - **A new error rule**: add a function decorated with `@rule("category.name")` in
   `src/django_doctor/explain/rules/` and a case to `tests/test_explain_rules.py`. Extract

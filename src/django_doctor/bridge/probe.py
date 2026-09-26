@@ -263,7 +263,8 @@ def action_info(args):
             "url": settings.STATIC_URL,
             "root": str(settings.STATIC_ROOT) if settings.STATIC_ROOT else None,
             "dirs": [str(d[1] if isinstance(d, (list, tuple)) else d) for d in settings.STATICFILES_DIRS],
-            "storages": _jsonable(storages) if storages else None,
+            # Only backend class names: OPTIONS often hold cloud credentials.
+            "storages": dict((str(k), {"BACKEND": str((v or {}).get("BACKEND"))}) for k, v in storages.items()) if isinstance(storages, dict) else None,
         },
         "media": {
             "url": settings.MEDIA_URL,

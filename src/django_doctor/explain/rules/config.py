@@ -292,7 +292,7 @@ def _setting_for_env_var_by_setting(ctx: RuleContext, setting: str):
 
 def _add_interpreter_evidence(ctx: RuleContext, d: Diagnosis) -> None:
     if ctx.project is not None:
-        d.add_evidence(f"Python interpreter used: {ctx.project.project.python}", verified=True)
+        d.add_evidence(f"Python interpreter used: {ctx.project.project.python}", verified=True, private=True)
         d.add_cause("The project's virtualenv is not activated, so a different Python environment is being used.")
 
 

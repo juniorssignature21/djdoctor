@@ -38,9 +38,24 @@ class AIProvider(ABC):
         """Return the provider's text answer."""
 
 
+#: Diagnosis fields sent to a provider. Anything else (e.g. request paths) stays local.
+AI_FIELDS = ("rule_id", "category", "title", "what_happened", "why", "evidence", "causes", "fixes",
+             "commands", "risk", "risk_note", "error_type", "error_message", "location", "generic")
+
+
 def build_user_prompt(report: dict[str, Any]) -> str:
-    safe = redact_mapping(report)
-    # Location lines may contain a line of the user's code; keep only the file reference.
+    """The exact payload sent to a provider: an allow-list of diagnosis fields.
+
+    Excluded: source code lines, evidence quoting configuration values
+    (``private`` evidence), request paths. Secrets are masked in what remains.
+    """
+    safe = {k: report[k] for k in AI_FIELDS if k in report}
+    safe["evidence"] = [
+        {"text": e["text"], "verified": e["verified"]}
+        for e in safe.get("evidence", []) if not e.get("private")
+    ]
+    safe = redact_mapping(safe)
+    # The location includes a line of the user's code; keep only the file reference.
     if safe.get("location"):
         safe["location"] = safe["location"].splitlines()[0]
     return (

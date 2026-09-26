@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 
 import typer
+from rich.markup import escape
 
 from django_doctor.branding import CLI_NAME
 from django_doctor.bridge.manage import TracebackRecorder, run_streaming
@@ -103,7 +104,7 @@ def register(app: typer.Typer) -> None:
         c.print("")
         c.print("Starting development server...")
         c.print("")
-        c.print(f"[bold]{_display_url(addrport)}[/bold]")
+        c.print(f"[bold]{escape(_display_url(addrport))}[/bold]")
         c.print("")
 
         def on_error(tb: str) -> None:

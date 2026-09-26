@@ -4,12 +4,22 @@ on:
   push:
   pull_request:
 
+# Least privilege: jobs can only read the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
       - run: pip install ruff
@@ -27,9 +37,36 @@ jobs:
           - { os: ubuntu-latest, python: "3.13", django: "6.*" }
           - { os: macos-latest, python: "3.12", django: "5.2.*" }
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python }}
       - run: pip install -e . "Django==${{ matrix.django }}" pytest
       - run: pytest -q
+
+  audit:
+    name: Dependency audit & package check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install the package in an isolated environment
+        run: |
+          python -m venv /tmp/target
+          /tmp/target/bin/pip install --upgrade pip setuptools
+          /tmp/target/bin/pip install .
+      - name: Audit runtime dependencies for known vulnerabilities
+        run: |
+          pip install pip-audit
+          PIPAPI_PYTHON_LOCATION=/tmp/target/bin/python pip-audit --progress-spinner off --skip-editable
+      - name: Build and validate distributions
+        run: |
+          pip install build twine
+          python -m build
+          twine check --strict dist/*

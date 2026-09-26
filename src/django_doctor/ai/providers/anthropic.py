@@ -1,4 +1,4 @@
-"""Anthropic (Claude) provider. Requires ``pip install django-doctor[anthropic]``.
+"""Anthropic (Claude) provider. Requires ``pip install djdoctor[anthropic]``.
 
 Credentials are resolved by the SDK (ANTHROPIC_API_KEY, or an `ant auth login` profile).
 """
@@ -16,7 +16,7 @@ class AnthropicProvider(AIProvider):
         try:
             import anthropic
         except ImportError as exc:
-            raise AIUnavailable("The 'anthropic' package is not installed (pip install 'django-doctor[anthropic]').") from exc
+            raise AIUnavailable("The 'anthropic' package is not installed (pip install 'djdoctor[anthropic]').") from exc
         client = anthropic.Anthropic()
         try:
             response = client.beta.messages.create(

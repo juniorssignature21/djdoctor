@@ -1,0 +1,36 @@
+name: Bug report
+description: Something in Django Doctor does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report! **Security issues must be reported privately** (see SECURITY.md).
+        Please remove secrets, hostnames and personal data from any output you paste.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: The command you ran, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: Output of the command, ideally with `--verbose`. Check it for secrets first.
+      render: shell
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      placeholder: "djdoctor 0.1.0, Django 5.2, Python 3.12, PostgreSQL 16, Linux"
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Data safety
+      options:
+        - label: Django Doctor changed or deleted data / files without asking for confirmation
+          required: false

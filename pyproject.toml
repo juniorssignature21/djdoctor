@@ -3,7 +3,7 @@ requires = ["hatchling>=1.18"]
 build-backend = "hatchling.build"
 
 [project]
-name = "django-doctor"
+name = "djdoctor"
 dynamic = ["version"]
 description = "A safe developer-assistance CLI for Django: diagnostics, safe migrations and human-readable error explanations."
 readme = "README.md"
@@ -55,13 +55,20 @@ djdoctor = "django_doctor.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/juniorssignature21/djpilot"
+Documentation = "https://github.com/juniorssignature21/djpilot#readme"
 Issues = "https://github.com/juniorssignature21/djpilot/issues"
+Changelog = "https://github.com/juniorssignature21/djpilot/blob/main/CHANGELOG.md"
+Security = "https://github.com/juniorssignature21/djpilot/security/policy"
 
 [tool.hatch.version]
 path = "src/django_doctor/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/django_doctor"]
+
+# Explicit allow-list: nothing else from the working tree is ever published.
+[tool.hatch.build.targets.sdist]
+include = ["src/django_doctor", "tests", "README.md", "LICENSE", "CHANGELOG.md", "SECURITY.md", "pyproject.toml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

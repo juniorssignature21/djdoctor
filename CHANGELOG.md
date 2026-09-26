@@ -4,6 +4,24 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Security
+- `.djdoctor/` state (error logs, SQLite backups) is created owner-only (0700/0600); saved
+  error logs are redacted.
+- Terminal escape sequences and control characters from logs/tracebacks are stripped before display.
+- The inspection probe returns only storage backend names, never their options.
+- AI payloads use an allow-list: configuration values, request paths and code lines are never
+  sent; `explain --ai-preview` shows the exact payload.
+- Release pipeline: PyPI Trusted Publishing with attestations, SHA-pinned actions,
+  least-privilege tokens, dependency audit and CodeQL.
+
+### Changed
+- The PyPI distribution is named `djdoctor` (`django-doctor` is an unrelated project).
+
+### Added
+- SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, issue/PR templates, Dependabot.
+
 ## [0.1.0] - 2026-09-26
 
 ### Added

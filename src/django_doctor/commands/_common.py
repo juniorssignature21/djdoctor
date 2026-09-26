@@ -14,6 +14,7 @@ from django_doctor.exit_codes import ExitCode
 from django_doctor.explain.context import ProjectContext
 from django_doctor.explain.engine import explain_probe_error, explain_text
 from django_doctor.output.formatters import render_diagnosis
+from django_doctor.security import redact_text
 from django_doctor.state import AppState
 
 F = TypeVar("F", bound=Callable[..., Any])
@@ -101,6 +102,7 @@ def save_last_error(state: AppState, text: str | None) -> None:
     try:
         project = state.project()
         project.ensure_state_dir()
-        project.last_error_log.write_text(text, encoding="utf-8")
+        # Tracebacks can contain connection strings; mask secrets before saving.
+        project.write_private(project.last_error_log, redact_text(text))
     except (OSError, DoctorError):
         pass

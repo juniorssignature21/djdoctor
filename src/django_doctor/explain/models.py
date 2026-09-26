@@ -68,6 +68,9 @@ class Evidence:
     #: True when Django Doctor verified this against the project/database;
     #: False when it is read from the error text only.
     verified: bool = False
+    #: True when the text quotes project configuration (setting values, hosts,
+    #: local paths). Shown locally, never sent to an AI provider.
+    private: bool = False
 
 
 @dataclass
@@ -98,9 +101,9 @@ class Diagnosis:
     #: True when no specific rule matched and only generic advice is given.
     generic: bool = False
 
-    def add_evidence(self, text: str, verified: bool = False) -> None:
+    def add_evidence(self, text: str, verified: bool = False, *, private: bool = False) -> None:
         if not any(e.text == text for e in self.evidence):
-            self.evidence.append(Evidence(text, verified))
+            self.evidence.append(Evidence(text, verified, private))
 
     def add_cause(self, text: str, confidence: Confidence = Confidence.POSSIBLE) -> None:
         if not any(c.text == text for c in self.causes):

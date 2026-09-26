@@ -60,12 +60,24 @@ class DjangoProject:
         return self.root / STATE_DIRNAME
 
     def ensure_state_dir(self) -> Path:
-        self.state_dir.mkdir(exist_ok=True)
+        """Create ``.djdoctor/``, readable only by the current user.
+
+        It holds error logs and database backups, which can contain personal
+        data, so it is private (0700) and git-ignored.
+        """
+        self.state_dir.mkdir(mode=0o700, exist_ok=True)
+        make_private(self.state_dir, directory=True)
         gitignore = self.state_dir / ".gitignore"
         if not gitignore.exists():
-            # Keep local state (error logs, DB backups) out of version control.
             gitignore.write_text("*\n", encoding="utf-8")
         return self.state_dir
+
+    def write_private(self, path: Path, text: str) -> None:
+        """Write a file that only the current user can read (0600)."""
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        make_private(path)
 
     @property
     def last_error_log(self) -> Path:
@@ -113,6 +125,14 @@ class DjangoProject:
         if self.config.env_file:
             env.update(read_env_file(self.root / self.config.env_file))
         return env
+
+
+def make_private(path: Path, *, directory: bool = False) -> None:
+    """Restrict permissions to the owner (best effort; no-op on Windows ACLs)."""
+    try:
+        os.chmod(path, 0o700 if directory else 0o600)
+    except OSError:
+        pass
 
 
 # --------------------------------------------------------------------- lookup

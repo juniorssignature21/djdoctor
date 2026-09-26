@@ -38,6 +38,21 @@ _PG_DETAIL = re.compile(r"(Key \([^)]*\)=\()([^)]*)(\))")
 _MYSQL_DUPLICATE = re.compile(r"(Duplicate entry ')([^']*)(' for key)")
 
 
+# C0 controls except tab/newline, DEL and C1 controls. Removing ESC neutralises
+# ANSI/OSC terminal sequences (screen clearing, title/clipboard writes) that an
+# untrusted log file could otherwise inject into Django Doctor's output.
+_CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b-\x1f\x7f-\x9f]")
+_ANSI_SEQUENCE = re.compile(r"\x1b(?:\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(?:\x07|\x1b\\)?|[@-Z\\-_])")
+
+
+def strip_control(text: str) -> str:
+    """Remove terminal escape sequences and control characters (keeps \\n and \\t)."""
+    if not text:
+        return text
+    text = text.replace("\r\n", "\n")
+    return _CONTROL_CHARS.sub("", _ANSI_SEQUENCE.sub("", text))
+
+
 def is_sensitive_name(name: str) -> bool:
     return bool(_SENSITIVE_NAME.search(name or ""))
 

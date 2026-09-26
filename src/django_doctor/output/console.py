@@ -19,6 +19,11 @@ from rich.rule import Rule
 from rich.theme import Theme
 
 from django_doctor.branding import PRODUCT_NAME
+from django_doctor.security import strip_control
+
+
+def _clean(objects: tuple[Any, ...]) -> tuple[Any, ...]:
+    return tuple(strip_control(o) if isinstance(o, str) else o for o in objects)
 
 THEME = Theme(
     {
@@ -97,16 +102,16 @@ class Console:
 
     def print(self, *objects: Any, **kwargs: Any) -> None:
         """Always printed, even in quiet mode (results the user asked for)."""
-        self._out.print(*objects, **kwargs)
+        self._out.print(*_clean(objects), **kwargs)
 
     def out(self, *objects: Any, **kwargs: Any) -> None:
         """Normal-verbosity output."""
         if not self.quiet:
-            self._out.print(*objects, **kwargs)
+            self._out.print(*_clean(objects), **kwargs)
 
     def raw(self, text: str) -> None:
         """Write text without markup interpretation (always printed)."""
-        self._out.print(text, markup=False, highlight=False)
+        self._out.print(strip_control(text), markup=False, highlight=False)
 
     def blank(self) -> None:
         self.out("")
@@ -159,7 +164,7 @@ class Console:
             self._err.print(f"[muted]debug: {escape(text)}[/muted]")
 
     def stderr(self, *objects: Any, **kwargs: Any) -> None:
-        self._err.print(*objects, **kwargs)
+        self._err.print(*_clean(objects), **kwargs)
 
     # --------------------------------------------------------- confirmation
     def confirm(self, question: str, *, default: bool = False) -> bool:

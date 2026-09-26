@@ -1,4 +1,4 @@
-"""OpenAI provider. Requires ``pip install django-doctor[openai]`` and a configured model."""
+"""OpenAI provider. Requires ``pip install djdoctor[openai]`` and a configured model."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ class OpenAIProvider(AIProvider):
         try:
             import openai
         except ImportError as exc:
-            raise AIUnavailable("The 'openai' package is not installed (pip install 'django-doctor[openai]').") from exc
+            raise AIUnavailable("The 'openai' package is not installed (pip install 'djdoctor[openai]').") from exc
         try:
             client = openai.OpenAI()
             response = client.chat.completions.create(
