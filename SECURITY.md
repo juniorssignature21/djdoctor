@@ -13,7 +13,7 @@ Django Doctor is pre-1.0. Security fixes are released for the **latest minor ver
 **Please do not open a public issue for security problems.**
 
 Report privately through GitHub:
-**[Report a vulnerability](https://github.com/juniorssignature21/djpilot/security/advisories/new)**
+**[Report a vulnerability](https://github.com/juniorssignature21/djdoctor/security/advisories/new)**
 (repository → *Security* → *Advisories* → *Report a vulnerability*).
 
 Please include what you found, how to reproduce it, the affected version and the impact you

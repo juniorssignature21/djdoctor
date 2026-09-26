@@ -54,11 +54,11 @@ dev = [
 djdoctor = "django_doctor.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/juniorssignature21/djpilot"
-Documentation = "https://github.com/juniorssignature21/djpilot#readme"
-Issues = "https://github.com/juniorssignature21/djpilot/issues"
-Changelog = "https://github.com/juniorssignature21/djpilot/blob/main/CHANGELOG.md"
-Security = "https://github.com/juniorssignature21/djpilot/security/policy"
+Homepage = "https://github.com/juniorssignature21/djdoctor"
+Documentation = "https://github.com/juniorssignature21/djdoctor#readme"
+Issues = "https://github.com/juniorssignature21/djdoctor/issues"
+Changelog = "https://github.com/juniorssignature21/djdoctor/blob/main/CHANGELOG.md"
+Security = "https://github.com/juniorssignature21/djdoctor/security/policy"
 
 [tool.hatch.version]
 path = "src/django_doctor/__init__.py"

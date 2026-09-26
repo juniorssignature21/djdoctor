@@ -95,7 +95,7 @@ Optional extras for AI explanations: `pip install "djdoctor[anthropic]"` or
 To try it from a checkout:
 
 ```bash
-git clone https://github.com/juniorssignature21/djpilot && cd djpilot
+git clone https://github.com/juniorssignature21/djdoctor && cd djdoctor
 pip install -e ".[dev]"
 ```
 

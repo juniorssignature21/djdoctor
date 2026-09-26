@@ -23,7 +23,7 @@ Security issues: follow [SECURITY.md](SECURITY.md), not the public issue tracker
 ## Development setup
 
 ```bash
-git clone https://github.com/juniorssignature21/djpilot && cd djpilot
+git clone https://github.com/juniorssignature21/djdoctor && cd djdoctor
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
 ruff check src tests
@@ -55,7 +55,7 @@ Releases use [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/
 token is ever stored in GitHub:
 
 1. On PyPI, add a *pending trusted publisher* for project `djdoctor`: owner
-   `juniorssignature21`, repository `djpilot`, workflow `release.yml`, environment `pypi`.
+   `juniorssignature21`, repository `djdoctor`, workflow `release.yml`, environment `pypi`.
 2. In the GitHub repository settings, create the environment **`pypi`** and add yourself as a
    required reviewer, so every publish needs a manual approval.
 

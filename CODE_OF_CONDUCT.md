@@ -11,6 +11,6 @@ publishing others' private information are not acceptable.
 ## Reporting
 
 Report unacceptable behaviour privately to the project maintainer at
-**CONDUCT_CONTACT_EMAIL**. All reports will be reviewed promptly and handled confidentially.
+**[dev@codesignature.tech](mailto:dev@codesignature.tech)**. All reports will be reviewed promptly and handled confidentially.
 Enforcement follows the Contributor Covenant's
 [enforcement guidelines](https://www.contributor-covenant.org/version/2/1/code_of_conduct/#enforcement-guidelines).
