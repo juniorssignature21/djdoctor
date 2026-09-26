@@ -77,6 +77,10 @@ class TracebackRecorder:
                 finished = self._finish()
                 self._current = [text]
                 self._exc_index = None
+                # Keep the request line Django logs just before a traceback.
+                previous = list(self.recent)[-2] if len(self.recent) > 1 else ""
+                if previous.startswith(("Internal Server Error:", "Bad Request:", "Forbidden")):
+                    self._current.insert(0, previous)
             elif self._current is not None:
                 indented = text.startswith((" ", "\t"))
                 if self._exc_index is None:

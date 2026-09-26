@@ -74,7 +74,11 @@ def register(app: typer.Typer) -> None:
         pctx = _project_context(state, not no_inspect)
         emit_kwargs = dict(json_output=json_output, raw=raw, ai=ai, ai_provider=ai_provider)
 
-        if text is None and source in (None, "-") and not _stdin_is_tty():
+        use_stdin = text is None and (source == "-" or (source is None and not _stdin_is_tty()))
+        if use_stdin and source is None and _saved_error(state) is not None and not _stdin_ready(timeout=1.5):
+            # stdin is open but silent (e.g. a CI job or editor task): explain the saved error instead.
+            use_stdin = False
+        if use_stdin:
             if _explain_stream(state, pctx, echo=not no_echo and not json_output, **emit_kwargs):
                 return
             if source == "-":
@@ -89,11 +93,8 @@ def register(app: typer.Typer) -> None:
                 raise DoctorError(f"File not found: {source}")
             content, origin = path.read_text(encoding="utf-8", errors="replace"), str(path)
         else:
-            try:
-                last = state.project().last_error_log
-            except DoctorError:
-                last = None
-            if last is None or not last.is_file():
+            last = _saved_error(state)
+            if last is None:
                 raise DoctorError(
                     "No error to explain.",
                     detail="Django Doctor saves the last error seen by `djdoctor start`, `test`, `migrate` and "
@@ -108,6 +109,25 @@ def register(app: typer.Typer) -> None:
             c.warning("No Python/Django error was found in the input.")
             raise typer.Exit(int(ExitCode.GENERAL_ERROR))
         _emit(state, diagnosis, **emit_kwargs)
+
+
+def _saved_error(state: AppState) -> Path | None:
+    try:
+        path = state.project().last_error_log
+    except DoctorError:
+        return None
+    return path if path.is_file() else None
+
+
+def _stdin_ready(timeout: float) -> bool:
+    """True if stdin has data (or EOF) within ``timeout`` seconds."""
+    try:
+        import select
+
+        ready, _, _ = select.select([sys.stdin], [], [], timeout)
+        return bool(ready)
+    except (OSError, ValueError, TypeError, AttributeError):  # Windows pipes, no real file descriptor
+        return True
 
 
 def _stdin_is_tty() -> bool:
