@@ -1,0 +1,85 @@
+[build-system]
+requires = ["hatchling>=1.18"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-doctor"
+dynamic = ["version"]
+description = "A safe developer-assistance CLI for Django: diagnostics, safe migrations and human-readable error explanations."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Django Doctor contributors" }]
+keywords = ["django", "cli", "migrations", "diagnostics", "developer-tools"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Quality Assurance",
+]
+# Django itself is intentionally *not* a hard dependency: Django Doctor inspects
+# the Django installed in your project's environment (which may be a different
+# interpreter, see --python).
+dependencies = [
+    "typer>=0.12",
+    "rich>=13.0",
+    "tomli>=2.0; python_version < '3.11'",
+]
+
+[project.optional-dependencies]
+django = ["Django>=4.2"]
+anthropic = ["anthropic>=0.40"]
+openai = ["openai>=1.0"]
+dev = [
+    "Django>=4.2",
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "ruff>=0.4",
+]
+
+[project.scripts]
+djdoctor = "django_doctor.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/juniorssignature21/djpilot"
+Issues = "https://github.com/juniorssignature21/djpilot/issues"
+
+[tool.hatch.version]
+path = "src/django_doctor/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/django_doctor"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "slow: tests that create temporary Django projects and spawn subprocesses",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+ignore = ["E501", "B008", "SIM105", "B007"]
+
+[tool.ruff.lint.per-file-ignores]
+# The probe runs inside the *target* interpreter and must stay compatible with
+# older Pythons, so it avoids modern syntax on purpose.
+"src/django_doctor/bridge/probe.py" = ["UP", "B904", "SIM101"]
