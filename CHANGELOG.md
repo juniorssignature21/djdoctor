@@ -16,6 +16,10 @@ All notable changes to this project are documented here. The format follows
 - Release pipeline: PyPI Trusted Publishing with attestations, SHA-pinned actions,
   least-privilege tokens, dependency audit and CodeQL.
 
+### Fixed
+- The source distribution could include LICENSE files from a virtualenv inside the
+  project folder (0.1.0's sdist contains 39 such license files; harmless, no code or secrets).
+
 ### Changed
 - The PyPI distribution is named `djdoctor` (`django-doctor` is an unrelated project).
 
