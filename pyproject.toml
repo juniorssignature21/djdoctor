@@ -68,7 +68,9 @@ packages = ["src/django_doctor"]
 
 # Explicit allow-list: nothing else from the working tree is ever published.
 [tool.hatch.build.targets.sdist]
-include = ["src/django_doctor", "tests", "README.md", "LICENSE", "CHANGELOG.md", "SECURITY.md", "pyproject.toml"]
+# Leading "/" anchors each pattern to the project root; without it, "LICENSE"
+# would also match files inside a local virtualenv (as happened in 0.1.0).
+include = ["/src/django_doctor", "/tests", "/README.md", "/LICENSE", "/CHANGELOG.md", "/SECURITY.md", "/pyproject.toml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
